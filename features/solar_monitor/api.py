@@ -1,6 +1,9 @@
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Request
+from fastapi.responses import StreamingResponse
 from queue import Queue
 import threading
+import asyncio
+import json
 from .models import SolarMeasurement, SolarMeasurementBatch
 from .service import capture_solar_data, transfer_solar_to_database
 
@@ -19,6 +22,43 @@ def start_solar_background_threads():
         capture_thread.start()
         db_thread.start()
         threads_started = True
+
+async def event_generator():
+    last_sent = None
+    while True:
+        try:
+            if not data_queue.empty():
+                data = data_queue.get_nowait()
+                timestamp, voltage, current, power, energy = data
+                measurement = SolarMeasurement(
+                    voltage=voltage,
+                    current=current,
+                    power=power,
+                    energy=energy
+                )
+                current_data = measurement.dict()
+                
+                # Only send if data has changed
+                if current_data != last_sent:
+                    yield f"data: {json.dumps(current_data)}\n\n"
+                    last_sent = current_data
+            await asyncio.sleep(1)  # Adjust the interval as needed
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            print(f"Error in event generator: {e}")
+            await asyncio.sleep(1)
+
+@router.get("/latest/live")
+async def live_solar_measurements(request: Request):
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        }
+    )
 
 @router.get("/latest", response_model=SolarMeasurement)
 def get_latest_solar_measurement():

@@ -114,3 +114,5 @@ logs/
 
 # private
 old_system/
+templates/
+frontend/

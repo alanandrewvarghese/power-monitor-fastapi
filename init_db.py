@@ -50,6 +50,44 @@ def create_tables():
                     power_factor FLOAT NOT NULL
                 )
             """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS hourSummary (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    timestamp DATETIME NOT NULL,
+                    energyConsumption FLOAT NOT NULL,
+                    avgVoltage FLOAT NOT NULL,
+                    avgCurrent FLOAT NOT NULL,
+                    avgPower FLOAT NOT NULL,
+                    avgFrequency FLOAT NOT NULL,
+                    avgPF FLOAT NOT NULL,
+                    UNIQUE(timestamp)
+                )
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS hourSummarySolar (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    timestamp DATETIME NOT NULL,
+                    energyProduced FLOAT NOT NULL,
+                    minVoltage FLOAT NOT NULL,
+                    maxVoltage FLOAT NOT NULL,
+                    avgVoltage FLOAT NOT NULL,
+                    minCurrent FLOAT NOT NULL,
+                    maxCurrent FLOAT NOT NULL,
+                    avgCurrent FLOAT NOT NULL,
+                    minPower FLOAT NOT NULL,
+                    maxPower FLOAT NOT NULL,
+                    UNIQUE(timestamp)
+                )
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS dailySummary (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    date DATE NOT NULL,
+                    energyConsumption FLOAT,
+                    solarProduction FLOAT,
+                    UNIQUE(date)
+                )
+            """)
         connection.commit()
         print("Tables created successfully.")
     finally:

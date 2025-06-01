@@ -25,7 +25,7 @@ def capture_ac_data(data_queue, stop_event=None):
                         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         data_with_timestamp = (timestamp, data['voltage'], data['current'], data['power'], data['energy'], data['frequency'], data['power_factor'])
                         data_queue.put(data_with_timestamp)
-                        logging.info(f"Captured data: {data_with_timestamp}")
+                        logging.info(f"Captured data (AC): {timestamp}, Voltage: {data['voltage']}, Current: {data['current']}, Power: {data['power']}, Energy: {data['energy']}, Frequency: {data['frequency']}, Power Factor: {data['power_factor']}")
                 else:
                     logging.warning("No data received from PZEM device")
             except Exception as e:

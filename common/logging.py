@@ -3,7 +3,7 @@ import os
 from logging.handlers import RotatingFileHandler
 
 # Ensure log directory exists
-LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'log')
+LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
 
 LOG_FILE = os.path.join(LOG_DIR, 'app.log')

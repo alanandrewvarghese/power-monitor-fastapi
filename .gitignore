@@ -110,7 +110,7 @@ venv.bak/
 .idea/*
 
 # log files
-log/
+logs/
 
 # private
 old_system/

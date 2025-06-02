@@ -31,7 +31,7 @@ def daily_summary():
 @router.get("/energy-at-midnight")
 def get_energy_at_midnight(date: Optional[str] = Query(None, description="Date in YYYY-MM-DD format. Defaults to today.")):
     """
-    Get the energy values from energyConsumption_raw and energyProduction_raw at 00:00 for a given date (default: today).
+    Get the energy values from energyConsumption_raw and energyProduction_raw just before 00:00 for a given date (default: today).
     """
     from common.database import db_connection
     if date is None:
@@ -40,18 +40,18 @@ def get_energy_at_midnight(date: Optional[str] = Query(None, description="Date i
         if not connection:
             return JSONResponse(status_code=500, content={"detail": "Database connection error"})
         with connection.cursor() as cursor:
-            # Get the first record at or after 00:00 for the date
+            # Get the last record before 00:00 for the date
             cursor.execute("""
                 SELECT energy FROM energyConsumption_raw
-                WHERE timestamp >= %s AND timestamp < DATE_ADD(%s, INTERVAL 1 DAY)
-                ORDER BY timestamp ASC LIMIT 1
-            """, (f"{date} 00:00:00", date))
+                WHERE timestamp < %s
+                ORDER BY timestamp DESC LIMIT 1
+            """, (f"{date} 00:00:00",))
             row_c = cursor.fetchone()
             cursor.execute("""
                 SELECT energy FROM energyProduction_raw
-                WHERE timestamp >= %s AND timestamp < DATE_ADD(%s, INTERVAL 1 DAY)
-                ORDER BY timestamp ASC LIMIT 1
-            """, (f"{date} 00:00:00", date))
+                WHERE timestamp < %s
+                ORDER BY timestamp DESC LIMIT 1
+            """, (f"{date} 00:00:00",))
             row_p = cursor.fetchone()
     return {
         "date": date,
